@@ -211,6 +211,18 @@ function saveRemote(){
 }
 function logout(){ pin=null; readOnly=true; try{ localStorage.removeItem('mo-pin'); }catch(e){} render(); }
 
+/* ---------- visitor counter ---------- */
+var stats = null;
+function logVisit(){
+  try{ if(sessionStorage.getItem('mo-logged')) return; }catch(e){}
+  var id=null; try{ id=localStorage.getItem('mo-dev'); if(!id){ id=uid()+uid()+uid(); localStorage.setItem('mo-dev',id); } }catch(e){ id=uid()+uid(); }
+  rest('/rest/v1/rpc/log_visit',{p_device:id,p_installed:!!isStandalone}).then(function(){ try{ sessionStorage.setItem('mo-logged','1'); }catch(e){} }).catch(function(){});
+}
+function loadStats(){
+  if(!REMOTE || readOnly || !pin) return;
+  rest('/rest/v1/rpc/visit_stats',{p_pin:pin}).then(function(r){ stats=r; if(route()==='home' && !ui.modal) render(); }).catch(function(){});
+}
+
 function commit(msg){
   if(msg) ui.toast = msg;
   render();
@@ -318,6 +330,14 @@ function viewHome(){
     '<div class="card stat"><b>'+entries+'</b><span>Entries</span></div>'+
     '<div class="card stat"><b>'+played+'</b><span>Matches played</span></div>'+
     '<div class="card stat"><b>'+ready.length+'</b><span>Ready to play</span></div></div>';
+  if(REMOTE && !readOnly){
+    s+='<h2>App usage</h2><div class="grid g3">'+
+      '<div class="card stat"><b>'+(stats?stats.people:'–')+'</b><span>People</span></div>'+
+      '<div class="card stat"><b>'+(stats?stats.installed:'–')+'</b><span>Installed</span></div>'+
+      '<div class="card stat"><b>'+(stats?stats.today:'–')+'</b><span>Last 24 hours</span></div>'+
+      '<div class="card stat"><b>'+(stats?stats.opens:'–')+'</b><span>Times opened</span></div></div>'+
+      '<p class="small muted">Counted since 2 November 2026. Only organisers can see this.</p>';
+  }
   if(champs.length){
     s+='<h2>Champions</h2><div class="grid g2">'+champs.map(function(x){return '<div class="champ"><div class="trophy">🏆</div><div><span>'+h(x.ev.name)+'</span><b>'+h(x.c.winner)+'</b>'+(x.c.runnerUp?'<span>beat '+h(x.c.runnerUp)+'</span>':'')+'</div></div>';}).join('')+'</div>';
   }
@@ -508,7 +528,7 @@ var forms={
     var v=f.pin.value.trim(); if(!v) return;
     ui.modal.err=''; ui.modal.busy=true; render();
     rest('/rest/v1/rpc/check_pin',{p_pin:v}).then(function(ok){
-      if(ok===true){ pin=v; readOnly=false; try{ localStorage.setItem('mo-pin',v); }catch(e){} ui.modal=null; toast('Organiser mode on'); }
+      if(ok===true){ pin=v; readOnly=false; try{ localStorage.setItem('mo-pin',v); }catch(e){} ui.modal=null; toast('Organiser mode on'); loadStats(); }
       else { ui.modal.busy=false; ui.modal.err='That PIN isn\u2019t right.'; render(); }
     }).catch(function(){ ui.modal.busy=false; ui.modal.err='Couldn\u2019t check the PIN. Are you online?'; render(); });
   },
@@ -574,6 +594,8 @@ if('serviceWorker' in navigator && /^https:|^http:\/\/localhost/.test(location.h
 if(REMOTE){
   render();
   loadRemote(true);
+  logVisit(); loadStats();
+  setInterval(loadStats, 60000);
   setInterval(function(){ if(document.visibilityState==='visible') loadRemote(false); }, 15000);
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') loadRemote(false); });
   window.addEventListener('online', function(){ loadRemote(false); if(dirty) scheduleSave(); });
