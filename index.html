@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moseley Open</title>
+<meta name="theme-color" content="#123a2c">
+<meta name="description" content="Draws, order of play, results and champions for the Moseley Open tennis tournament.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Moseley Open">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#123a2c; --green-2:#1d5440; --green-3:#2f7a5c;
+  --cream:#f7f2e7; --paper:#fffdf8; --ink:#17231e; --muted:#5f6f67; --line:#e2dccd;
+  --ball:#d9ea4c; --clay:#c8653d; --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header.top{background:var(--green);color:var(--cream);position:sticky;top:0;z-index:20;box-shadow:0 2px 0 rgba(0,0,0,.08)}
+.top .wrap{display:flex;align-items:center;gap:14px;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto}
+.brand b{font-family:"DM Serif Display",serif;font-weight:400;font-size:22px;letter-spacing:.2px}
+.ballicon{width:26px;height:26px;flex:none}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;width:100%}
+@media(min-width:720px){nav.tabs{width:auto}}
+nav.tabs a{padding:7px 13px;border-radius:999px;text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap;color:#d6e3db}
+nav.tabs a.on{background:var(--ball);color:var(--green)}
+nav.tabs a:not(.on):hover{background:rgba(255,255,255,.08)}
+main{padding:22px 0 60px}
+.hero{background:var(--green);color:var(--cream);border-radius:22px;padding:28px 24px;position:relative;overflow:hidden}
+.hero h1{font-family:"DM Serif Display",serif;font-weight:400;font-size:clamp(38px,8vw,64px);line-height:1;margin:0 0 10px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:#cfe0d6;font-weight:600}
+.hero p{max-width:560px;color:#e6eee9;margin:14px 0 0}
+.hero svg.lines{position:absolute;right:-40px;top:-10px;width:320px;opacity:.16;pointer-events:none}
+h2{font-family:"DM Serif Display",serif;font-weight:400;font-size:28px;margin:28px 0 12px}
+h3{margin:0 0 8px;font-size:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.grid{display:grid;gap:12px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.stat b{display:block;font-family:"DM Serif Display",serif;font-weight:400;font-size:34px;line-height:1.1;color:var(--green)}
+.stat span{color:var(--muted);font-weight:600;font-size:13px}
+.btn{text-decoration:none;display:inline-block;border:0;background:var(--green);color:var(--cream);padding:9px 15px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn:hover{background:var(--green-2)}
+.btn.ball{background:var(--ball);color:var(--green)}
+.btn.ghost{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.btn.ghost:hover{background:rgba(18,58,44,.06)}
+.btn.danger{background:transparent;color:var(--clay);border:1.5px solid var(--clay)}
+.btn.sm{padding:6px 11px;font-size:13px;border-radius:8px}
+.btn.link{background:none;color:var(--clay);padding:4px 6px;font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+input[type=text],input[type=number],select,textarea{width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green-3)}
+label.f{display:block;font-weight:700;font-size:13px;margin:10px 0 4px;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;background:#e9efe2;color:var(--green);font-weight:700;font-size:12px}
+.pill.clay{background:#f6e2d8;color:#9b4524}
+.pill.ball{background:var(--ball);color:var(--green)}
+.evpick{display:flex;align-items:center;gap:10px;margin-bottom:16px;max-width:460px}
+.evpick label{font-weight:700;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.evpick select{flex:1;padding:11px 40px 11px 14px;font-weight:700;font-size:16px;color:var(--green);border:2px solid var(--green);border-radius:12px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23123a2c' stroke-width='2.2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;-webkit-appearance:none;appearance:none;cursor:pointer}
+.entries{list-style:none;margin:0;padding:0}
+.entries li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.entries li:last-child{border-bottom:0}
+.entries .num{width:24px;color:var(--muted);font-weight:700;font-size:13px}
+.entries .nm{flex:1;font-weight:600}
+.entries input.seed{width:64px;padding:5px 8px}
+.bracket{display:flex;gap:18px;overflow-x:auto;padding:4px 2px 16px}
+.round{display:flex;flex-direction:column;min-width:220px;flex:none}
+.round h4{margin:0 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.round .ms{display:flex;flex-direction:column;justify-content:space-around;flex:1;gap:12px}
+.match{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:box-shadow .15s,border-color .15s;text-align:left;padding:0;width:100%}
+.match:hover{border-color:var(--green-3);box-shadow:0 3px 12px rgba(18,58,44,.1)}
+.match.static{cursor:default}
+.match.static:hover{box-shadow:none;border-color:var(--line)}
+.side{display:flex;align-items:center;gap:8px;padding:8px 11px}
+.side+.side{border-top:1px solid var(--line)}
+.side .n{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side .s{font-size:11px;color:var(--muted);font-weight:700}
+.side.win{background:#eef5e6}
+.side.win .n{font-weight:800;color:var(--green)}
+.side.lose .n{color:var(--muted)}
+.side.tbd .n,.side.bye .n{color:#a3aca7;font-style:italic;font-weight:500}
+.side .tick{width:16px;color:var(--green-3);font-weight:800}
+.mfoot{display:flex;gap:8px;justify-content:space-between;padding:5px 11px;background:#f7f4ec;border-top:1px solid var(--line);font-size:12px;color:var(--muted);font-weight:600}
+.mfoot .sc{color:var(--ink);font-weight:800}
+.champ{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,var(--green),var(--green-2));color:var(--cream);border-radius:var(--radius);padding:16px 18px}
+.champ .trophy{font-size:34px}
+.champ b{font-family:"DM Serif Display",serif;font-weight:400;font-size:24px;display:block;line-height:1.1}
+.champ span{color:#cfe0d6;font-size:13px;font-weight:600}
+.mlist{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.mlist .mhead{display:flex;justify-content:space-between;padding:7px 11px;font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line)}
+.empty{text-align:center;padding:28px 16px;color:var(--muted);border:1.5px dashed var(--line);border-radius:var(--radius)}
+table.hon{width:100%;border-collapse:collapse}
+table.hon th,table.hon td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+table.hon th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.banner{background:#fff6d6;border:1px solid #ecd98a;color:#6b5512;padding:9px 13px;border-radius:10px;margin-bottom:14px;font-weight:600;font-size:14px}
+.modal-bg{position:fixed;inset:0;background:rgba(10,25,18,.5);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:12px}
+@media(min-width:600px){.modal-bg{align-items:center}}
+.modal{background:var(--paper);border-radius:18px;padding:20px;width:100%;max-width:460px;max-height:90vh;overflow:auto}
+.modal h3{font-family:"DM Serif Display",serif;font-weight:400;font-size:24px;margin:0 0 4px}
+.pick{display:grid;gap:8px;margin-top:12px}
+.pick button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-weight:700;text-align:left;cursor:pointer}
+.pick button.on{border-color:var(--green);background:#eef5e6;color:var(--green)}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--cream);padding:9px 16px;border-radius:999px;font-weight:700;font-size:13px;z-index:60}
+header.top{padding-top:env(safe-area-inset-top)}
+.htools{display:flex;gap:6px;align-items:center}
+.hbtn{border:1.5px solid rgba(255,255,255,.35);background:transparent;color:var(--cream);padding:6px 11px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.hbtn.ball{background:var(--ball);border-color:var(--ball);color:var(--green)}
+.hbtn.on{border-color:var(--ball);color:var(--ball)}
+ol.steps{padding-left:20px;margin:12px 0}
+ol.steps li{margin:8px 0}
+.kbd{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 6px;background:#fff}
+footer{padding-bottom:calc(30px + env(safe-area-inset-bottom)) !important;color:var(--muted);font-size:12px;text-align:center;padding:10px 0 30px}
+</style>
+</head><body><div id="root"></div><script src="config.js"></script><script id="app">
+(function(){
+var LS_KEY = 'moseley-open-state-v1';
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function h(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+function defaultState(){
+  return {
+    v:1,
+    info:{ dates:'', venue:'Moseley, Birmingham', blurb:'Our club tournament: sign up, check the draw, and report your scores here.' },
+    events:[
+      ["Ladies' Singles",'singles'],["Ladies' Doubles",'doubles'],
+      ["Men's Singles",'singles'],["Men's Doubles",'doubles'],
+      ['Mixed Doubles','doubles'],
+      ["Vets Women's Singles",'singles'],["Vets Men's Singles",'singles'],
+      ["Vets Women's Doubles",'doubles'],["Vets Men's Doubles",'doubles'],
+      ['Vets Mixed Doubles','doubles']
+    ].map(function(x){ return {id:uid(),name:x[0],kind:x[1],entries:[],draw:null}; }),
+    honours:[]
+  };
+}
+
+var CFG = window.MOSELEY_CONFIG || {};
+var REMOTE = !!(CFG.supabaseUrl && CFG.supabaseKey);
+var CACHE_KEY = 'moseley-open-cache-v1';
+var state = null, version = 0, offline = false, loadErr = '';
+var pin = null; try{ pin = localStorage.getItem('mo-pin'); }catch(e){}
+var readOnly = REMOTE ? !pin : false;
+var saving = false, dirty = false, saveTimer = null;
+
+var ui = { modal:null, evSel:null, toast:'' };
+try{ ui.evSel = sessionStorage.getItem('mo-ev'); }catch(e){}
+
+/* ---------- shared database (Supabase) ---------- */
+function rest(path, body){
+  var headers = { apikey: CFG.supabaseKey, 'Content-Type':'application/json' };
+  if(/^eyJ/.test(CFG.supabaseKey)) headers.Authorization = 'Bearer '+CFG.supabaseKey;
+  return fetch(CFG.supabaseUrl.replace(/\/+$/,'')+path, { method: body?'POST':'GET', headers: headers, body: body?JSON.stringify(body):undefined, cache:'no-store' })
+    .then(function(r){ return r.text().then(function(t){
+      var j=null; try{ j = t?JSON.parse(t):null; }catch(e){}
+      if(!r.ok) throw new Error((j && (j.message||j.hint||j.error)) || ('HTTP '+r.status));
+      return j;
+    }); });
+}
+function busy(){ return saving || dirty || (ui.modal && ui.modal.type!=='pin' && ui.modal.type!=='install'); }
+function loadRemote(force){
+  return rest('/rest/v1/tournament?id=eq.1&select=state,version').then(function(rows){
+    var row = rows && rows[0];
+    if(!row) throw new Error('The database has no tournament yet. Run setup.sql in Supabase.');
+    offline = false; loadErr = '';
+    if(!force && busy()) return;
+    if(state && row.version===version) return;
+    version = row.version; state = row.state || defaultState();
+    try{ localStorage.setItem(CACHE_KEY, JSON.stringify({state:state,version:version})); }catch(e){}
+    render();
+  }).catch(function(err){
+    if(!state){
+      try{ var c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null'); if(c){ state=c.state; version=c.version; } }catch(e){}
+      if(!state) loadErr = err.message || 'Could not load';
+    }
+    offline = true; render();
+  });
+}
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){ if(!saving) saveRemote(); }, 500);
+}
+function saveRemote(){
+  if(!dirty) return;
+  saving = true; dirty = false;
+  rest('/rest/v1/rpc/save_state', { p_pin: pin, p_state: state, p_version: version }).then(function(v){
+    saving = false; version = v; offline = false;
+    try{ localStorage.setItem(CACHE_KEY, JSON.stringify({state:state,version:version})); }catch(e){}
+    if(dirty) scheduleSave();
+  }).catch(function(err){
+    saving = false;
+    var m = err.message || '';
+    if(/conflict/i.test(m)){ dirty=false; toast('Someone else just made a change. Showing the latest.'); loadRemote(true); }
+    else if(/pin/i.test(m)){ dirty=false; logout(); toast('Your organiser PIN was not accepted'); loadRemote(true); }
+    else { dirty = true; offline = true; toast('Couldn’t save. Retrying…'); setTimeout(scheduleSave, 5000); }
+  });
+}
+function logout(){ pin=null; readOnly=true; try{ localStorage.removeItem('mo-pin'); }catch(e){} render(); }
+
+function commit(msg){
+  if(msg) ui.toast = msg;
+  render();
+  if(msg){ clearTimeout(toast.t); toast.t=setTimeout(function(){ui.toast='';render();},1800); }
+  if(!REMOTE){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} return; }
+  if(readOnly) return;
+  dirty = true; scheduleSave();
+}
+function toast(m){ ui.toast=m; render(); clearTimeout(toast.t); toast.t=setTimeout(function(){ui.toast='';render();},1800); }
+
+/* ---------- draw logic ---------- */
+function seedOrder(n){
+  var a=[1,2];
+  while(a.length<n){ var len=a.length*2, b=[]; a.forEach(function(x){ b.push(x, len+1-x); }); a=b; }
+  return a.slice(0,n);
+}
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
+function makeDraw(ev){
+  var n = ev.entries.length, size = 2;
+  while(size<n) size*=2;
+  var seeded = ev.entries.filter(function(e){return e.seed;}).sort(function(x,y){return x.seed-y.seed;});
+  var rest = shuffle(ev.entries.filter(function(e){return !e.seed;}).slice());
+  var ranked = seeded.concat(rest); // index k -> seed number k+1
+  var order = seedOrder(size);
+  var slots = order.map(function(s){ return s<=n ? ranked[s-1].id : null; });
+  var rounds=[], r0=[];
+  for(var i=0;i<size;i+=2) r0.push({a:slots[i],b:slots[i+1],w:null,score:'',court:'',time:''});
+  rounds.push(r0);
+  var cnt=r0.length;
+  while(cnt>1){ cnt/=2; var r=[]; for(var k=0;k<cnt;k++) r.push({a:null,b:null,w:null,score:'',court:'',time:''}); rounds.push(r); }
+  ev.draw = {size:size, rounds:rounds};
+  derive(ev);
+}
+function winnerOf(m, r){
+  if(m.w) return m[m.w];
+  if(r===0 && ((m.a==null)!==(m.b==null))) return m.a!=null?m.a:m.b;
+  return null;
+}
+function isBye(m, r){ return r===0 && ((m.a==null)!==(m.b==null)); }
+function derive(ev){
+  var d=ev.draw; if(!d) return;
+  for(var r=1;r<d.rounds.length;r++){
+    for(var i=0;i<d.rounds[r].length;i++){
+      var pa=winnerOf(d.rounds[r-1][2*i],r-1), pb=winnerOf(d.rounds[r-1][2*i+1],r-1), m=d.rounds[r][i];
+      if(m.a!==pa||m.b!==pb){ m.a=pa; m.b=pb; m.w=null; m.score=''; }
+    }
+  }
+}
+function roundName(r,total){
+  var left=total-r;
+  if(left===1) return 'Final'; if(left===2) return 'Semi-finals'; if(left===3) return 'Quarter-finals';
+  return 'Round of '+Math.pow(2,left);
+}
+function entryName(ev,id){ var e=ev.entries.find(function(x){return x.id===id;}); return e?e.name:'?'; }
+function entrySeed(ev,id){ var e=ev.entries.find(function(x){return x.id===id;}); return e&&e.seed?e.seed:null; }
+function champion(ev){
+  if(!ev.draw) return null;
+  var R=ev.draw.rounds, f=R[R.length-1][0];
+  var w=winnerOf(f,R.length-1);
+  if(!w || (R.length>1 && !f.w)) return null;
+  if(R.length===1 && !f.w && !isBye(f,0)) return null;
+  return {winner:entryName(ev,w), runnerUp: f.w ? entryName(ev, f.w==='a'?f.b:f.a) : ''};
+}
+function allMatches(){
+  var out=[];
+  state.events.forEach(function(ev){
+    if(!ev.draw) return;
+    var R=ev.draw.rounds;
+    R.forEach(function(round,r){ round.forEach(function(m,i){
+      if(m.a!=null && m.b!=null) out.push({ev:ev,m:m,r:r,i:i,total:R.length});
+    }); });
+  });
+  return out;
+}
+
+/* ---------- views ---------- */
+var BALL = '<svg class="ballicon" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#d9ea4c"/><path d="M5 8c6 3 6 13 0 16M27 8c-6 3-6 13 0 16" stroke="#fff" stroke-width="2" fill="none"/></svg>';
+
+function sideHTML(ev,m,key,r){
+  var id=m[key], bye=isBye(m,r)&&id==null, tbd=!bye&&id==null;
+  var cls = bye?'bye':tbd?'tbd':(m.w?(m.w===key?'win':'lose'):'');
+  var seed = id?entrySeed(ev,id):null;
+  return '<div class="side '+cls+'"><span class="tick">'+(m.w===key?'✓':'')+'</span><span class="n">'+(bye?'Bye':tbd?'TBD':h(entryName(ev,id)))+'</span>'+(seed?'<span class="s">['+seed+']</span>':'')+'</div>';
+}
+function matchHTML(ev,m,r,i,total,withHead){
+  var playable = m.a!=null && m.b!=null && !readOnly;
+  var foot = '';
+  if(m.score || m.court || m.time) foot = '<div class="mfoot"><span class="sc">'+h(m.score)+'</span><span>'+h([m.court,m.time].filter(Boolean).join(' · '))+'</span></div>';
+  var head = withHead ? '<div class="mhead"><span>'+h(ev.name)+'</span><span>'+roundName(r,total)+'</span></div>' : '';
+  return '<button class="match'+(playable?'':' static')+'" '+(playable?'data-act="openResult" data-ev="'+ev.id+'" data-r="'+r+'" data-i="'+i+'"':'tabindex="-1"')+'>'+head+sideHTML(ev,m,'a',r)+sideHTML(ev,m,'b',r)+foot+'</button>';
+}
+
+function viewHome(){
+  var I=state.info, ms=allMatches();
+  var played=ms.filter(function(x){return x.m.w;}).length;
+  var ready=ms.filter(function(x){return !x.m.w;});
+  var entries=state.events.reduce(function(s,e){return s+e.entries.length;},0);
+  var champs=state.events.map(function(ev){var c=champion(ev); return c?{ev:ev,c:c}:null;}).filter(Boolean);
+  var s='<section class="hero"><svg class="lines" viewBox="0 0 200 120"><g stroke="#fff" stroke-width="2" fill="none"><rect x="10" y="10" width="180" height="100"/><line x1="100" y1="10" x2="100" y2="110"/><line x1="10" y1="25" x2="190" y2="25"/><line x1="10" y1="95" x2="190" y2="95"/><line x1="55" y1="25" x2="55" y2="95"/><line x1="145" y1="25" x2="145" y2="95"/><line x1="55" y1="60" x2="145" y2="60"/></g></svg>'+
+    '<h1>Moseley Open</h1><div class="meta">'+(I.dates?'<span>📅 '+h(I.dates)+'</span>':'')+(I.venue?'<span>📍 '+h(I.venue)+'</span>':'')+'</div>'+
+    (I.blurb?'<p>'+h(I.blurb)+'</p>':'')+
+    (readOnly?'<div class="row" style="margin-top:16px"><a class="btn ball" href="#draws">See the draws</a><a class="btn ghost sm" style="color:var(--cream);border-color:rgba(255,255,255,.5)" href="#matches">Results</a></div>':'<div class="row" style="margin-top:16px"><a class="btn ball" href="#players">Enter players</a><button class="btn ghost sm" style="color:var(--cream);border-color:rgba(255,255,255,.5)" data-act="editInfo">Edit details</button></div>')+'</section>';
+  s+='<div class="grid g3" style="margin-top:14px">'+
+    '<div class="card stat"><b>'+state.events.length+'</b><span>Events</span></div>'+
+    '<div class="card stat"><b>'+entries+'</b><span>Entries</span></div>'+
+    '<div class="card stat"><b>'+played+'</b><span>Matches played</span></div>'+
+    '<div class="card stat"><b>'+ready.length+'</b><span>Ready to play</span></div></div>';
+  if(champs.length){
+    s+='<h2>Champions</h2><div class="grid g2">'+champs.map(function(x){return '<div class="champ"><div class="trophy">🏆</div><div><span>'+h(x.ev.name)+'</span><b>'+h(x.c.winner)+'</b>'+(x.c.runnerUp?'<span>beat '+h(x.c.runnerUp)+'</span>':'')+'</div></div>';}).join('')+'</div>';
+  }
+  s+='<h2>Up next</h2>';
+  if(ready.length) s+='<div class="mlist">'+ready.slice(0,6).map(function(x){return matchHTML(x.ev,x.m,x.r,x.i,x.total,true);}).join('')+'</div>'+(ready.length>6?'<p><a href="#matches">See all '+ready.length+' matches →</a></p>':'');
+  else s+='<div class="empty">No matches waiting. '+(state.events.some(function(e){return e.draw;})?'All caught up!':'Add players and make the draws to get started.')+'</div>';
+  return s;
+}
+
+function currentEvent(){
+  var ev = state.events.find(function(e){return e.id===ui.evSel;}) || state.events[0];
+  if(ev) ui.evSel = ev.id;
+  return ev;
+}
+function evTabs(){
+  return '<div class="evpick"><label for="evsel">Event</label><select id="evsel" data-evsel>'+state.events.map(function(e){
+      var st = champion(e)?' · 🏆 complete':e.draw?' · in play':' · '+e.entries.length+' '+(e.entries.length===1?'entry':'entries');
+      return '<option value="'+e.id+'" '+(e.id===ui.evSel?'selected':'')+'>'+h(e.name)+st+'</option>';
+    }).join('')+(readOnly?'':'<option value="__new">+ Add a new event…</option>')+'</select></div>';
+}
+
+function viewPlayers(){
+  var ev=currentEvent();
+  var s='<h2>Players &amp; entries</h2>';
+  if(!ev) return s+evTabs()+'<div class="empty">No events yet. Add one to start taking entries.</div>';
+  s+=evTabs();
+  s+='<div class="grid g2"><div class="card"><div class="row"><h3 style="margin:0">'+h(ev.name)+'</h3><span class="pill">'+(ev.kind==='doubles'?'Doubles':'Singles')+'</span><span class="spacer"></span>'+
+    (readOnly?'':'<button class="btn link" data-act="editEvent" data-ev="'+ev.id+'">Edit</button>')+'</div>';
+  if(ev.draw) s+='<p class="small muted" style="margin:8px 0 0">The draw has been made, so entries are locked. Reset the draw on the Draws page to change them.</p>';
+  if(!ev.entries.length) s+='<div class="empty" style="margin-top:12px">No entries yet.</div>';
+  else s+='<ul class="entries" style="margin-top:8px">'+ev.entries.map(function(e,k){
+    return '<li><span class="num">'+(k+1)+'</span><span class="nm">'+h(e.name)+'</span>'+
+      (ev.draw||readOnly ? (e.seed?'<span class="pill ball">Seed '+e.seed+'</span>':'') :
+      '<input class="seed" type="number" min="1" placeholder="Seed" value="'+(e.seed||'')+'" data-seed="'+e.id+'" title="Seed (optional)"><button class="btn link" data-act="delEntry" data-id="'+e.id+'" aria-label="Remove">✕</button>')+'</li>';
+  }).join('')+'</ul>';
+  s+='</div>';
+  if(!ev.draw && !readOnly){
+    s+='<div class="card"><h3>Add '+(ev.kind==='doubles'?'pairs':'players')+'</h3>'+
+      '<form data-form="addEntries"><textarea name="names" rows="6" placeholder="'+(ev.kind==='doubles'?'One pair per line, e.g.\nSam Patel & Jo Reid':'One name per line, e.g.\nSam Patel\nJo Reid')+'"></textarea>'+
+      '<div class="row" style="margin-top:10px"><button class="btn" type="submit">Add</button><span class="spacer"></span>'+
+      '<button type="button" class="btn ball" data-act="genDraw" '+(ev.entries.length<2?'disabled':'')+'>Make the draw →</button></div></form>'+
+      '<p class="small muted">Seeds are optional. Seeded players are kept apart in the draw, and top seeds get any byes. Everyone else is drawn at random.</p></div>';
+  }
+  s+='</div>';
+  return s;
+}
+
+function viewDraws(){
+  var ev=currentEvent();
+  var s='<h2>Draws</h2>'+evTabs();
+  if(!ev) return s+'<div class="empty">No events yet.</div>';
+  if(!ev.draw){
+    return s+'<div class="empty">The '+h(ev.name)+' draw hasn\'t been made yet.'+(readOnly?'':'<br><br>'+(ev.entries.length>=2?'<button class="btn ball" data-act="genDraw">Make the draw</button>':'<a class="btn" href="#players">Add entries first</a>'))+'</div>';
+  }
+  var c=champion(ev);
+  if(c) s+='<div class="champ" style="margin-bottom:14px"><div class="trophy">🏆</div><div><span>'+h(ev.name)+' champion</span><b>'+h(c.winner)+'</b>'+(c.runnerUp?'<span>beat '+h(c.runnerUp)+'</span>':'')+'</div></div>';
+  var R=ev.draw.rounds;
+  s+='<div class="bracket">'+R.map(function(round,r){
+    return '<div class="round"><h4>'+roundName(r,R.length)+'</h4><div class="ms">'+round.map(function(m,i){return matchHTML(ev,m,r,i,R.length,false);}).join('')+'</div></div>';
+  }).join('')+'</div>';
+  if(!readOnly) s+='<div class="row"><span class="small muted">Tap a match to enter the result.</span><span class="spacer"></span><button class="btn danger sm" data-act="resetDraw">Reset draw</button></div>';
+  return s;
+}
+
+function viewMatches(){
+  var ms=allMatches();
+  var ready=ms.filter(function(x){return !x.m.w;}), done=ms.filter(function(x){return x.m.w;}).reverse();
+  var s='<h2>Order of play</h2>';
+  s+= ready.length ? '<div class="mlist">'+ready.map(function(x){return matchHTML(x.ev,x.m,x.r,x.i,x.total,true);}).join('')+'</div>' : '<div class="empty">No matches waiting to be played.</div>';
+  s+='<h2>Results</h2>';
+  s+= done.length ? '<div class="mlist">'+done.map(function(x){return matchHTML(x.ev,x.m,x.r,x.i,x.total,true);}).join('')+'</div>' : '<div class="empty">No results yet.</div>';
+  return s;
+}
+
+function viewHonours(){
+  var champs=state.events.map(function(ev){var c=champion(ev); return c?{ev:ev,c:c}:null;}).filter(Boolean);
+  var s='<h2>This year\'s champions</h2>';
+  s+= champs.length ? '<div class="grid g2">'+champs.map(function(x){return '<div class="champ"><div class="trophy">🏆</div><div><span>'+h(x.ev.name)+'</span><b>'+h(x.c.winner)+'</b>'+(x.c.runnerUp?'<span>Runner-up: '+h(x.c.runnerUp)+'</span>':'')+'</div></div>';}).join('')+'</div>'
+    : '<div class="empty">Champions appear here as soon as each final is decided.</div>';
+  if(champs.length && !readOnly) s+='<div class="row" style="margin-top:10px"><button class="btn ghost sm" data-act="archive">Add these champions to the honours board</button></div>';
+  s+='<h2>Honours board</h2><div class="card">';
+  var hs=state.honours.slice().sort(function(a,b){return String(b.year).localeCompare(String(a.year));});
+  s+= hs.length ? '<table class="hon"><thead><tr><th>Year</th><th>Event</th><th>Champion</th><th>Runner-up</th>'+(readOnly?'':'<th></th>')+'</tr></thead><tbody>'+hs.map(function(x){
+      return '<tr><td><b>'+h(x.year)+'</b></td><td>'+h(x.event)+'</td><td><b>'+h(x.winner)+'</b></td><td class="muted">'+h(x.runnerUp)+'</td>'+(readOnly?'':'<td><button class="btn link" data-act="delHon" data-id="'+x.id+'">✕</button></td>')+'</tr>';
+    }).join('')+'</tbody></table>' : '<p class="muted" style="margin:0">No past winners recorded yet.</p>';
+  if(!readOnly) s+='<form data-form="addHon" style="margin-top:14px"><div class="grid g3"><input type="text" name="year" placeholder="Year" value="'+new Date().getFullYear()+'"><input type="text" name="event" placeholder="Event"><input type="text" name="winner" placeholder="Champion"><input type="text" name="runnerUp" placeholder="Runner-up"></div><div class="row" style="margin-top:10px"><button class="btn sm" type="submit">Add past winner</button></div></form>';
+  s+='</div>';
+  return s;
+}
+
+/* ---------- modals ---------- */
+function modalHTML(){
+  var M=ui.modal; if(!M) return '';
+  var inner='';
+  if(M.type==='result'){
+    var ev=state.events.find(function(e){return e.id===M.ev;}), m=ev.draw.rounds[M.r][M.i];
+    inner='<h3>Enter result</h3><div class="muted small">'+h(ev.name)+' · '+roundName(M.r,ev.draw.rounds.length)+'</div>'+
+      '<label class="f">Winner</label><div class="pick">'+['a','b'].map(function(k){return '<button type="button" class="'+(M.w===k?'on':'')+'" data-act="pickW" data-k="'+k+'">'+(M.w===k?'✓ ':'')+h(entryName(ev,m[k]))+'</button>';}).join('')+'</div>'+
+      '<form data-form="saveResult"><label class="f">Score (winner\'s view)</label><input type="text" name="score" value="'+h(M.score)+'" placeholder="e.g. 6-4 3-6 10-7">'+
+      '<div class="grid g2" style="grid-template-columns:1fr 1fr;gap:8px"><div><label class="f">Court</label><input type="text" name="court" value="'+h(m.court)+'" placeholder="Court 2"></div><div><label class="f">Time</label><input type="text" name="time" value="'+h(m.time)+'" placeholder="Sat 10:00"></div></div>'+
+      '<div class="actions">'+(m.w?'<button type="button" class="btn danger" data-act="clearResult">Clear result</button>':'')+'<span class="spacer"></span><button type="button" class="btn ghost" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>';
+  } else if(M.type==='pin'){
+    inner='<h3>Organiser login</h3><p class="muted">Enter the organiser PIN to make draws and enter scores. This phone will stay logged in.</p><form data-form="pinLogin"><input type="password" name="pin" inputmode="numeric" autocomplete="current-password" placeholder="PIN">'+(M.err?'<p style="color:var(--clay);font-weight:700;margin:8px 0 0">'+h(M.err)+'</p>':'')+'<div class="actions"><button type="button" class="btn ghost" data-act="close">Cancel</button><button class="btn" type="submit" '+(M.busy?'disabled':'')+'>'+(M.busy?'Checking\u2026':'Log in')+'</button></div></form>';
+  } else if(M.type==='install'){
+    inner='<h3>Install the app</h3>'+(isIOS
+      ? '<ol class="steps"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button <span class="kbd">⬆︎</span>.</li><li>Scroll down and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. The Moseley Open icon appears on your home screen.</li></ol>'
+      : '<ol class="steps"><li>Open this page in <b>Chrome</b> (or Edge / Samsung Internet).</li><li>Tap the <b>⋮</b> menu.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li><li>The Moseley Open icon appears with your other apps.</li></ol>')+
+      '<p class="muted small">It\u2019s free, takes no storage space to speak of, and always shows the latest draws and scores.</p><div class="actions"><button class="btn" data-act="close">Got it</button></div>';
+  } else if(M.type==='confirm'){
+    inner='<h3>'+h(M.title)+'</h3><p>'+h(M.text)+'</p><div class="actions"><button class="btn ghost" data-act="close">Cancel</button><button class="btn danger" data-act="confirmYes">'+h(M.yes||'Yes')+'</button></div>';
+  } else if(M.type==='info'){
+    var I=state.info;
+    inner='<h3>Tournament details</h3><form data-form="saveInfo"><label class="f">Dates</label><input type="text" name="dates" value="'+h(I.dates)+'" placeholder="e.g. Sat 6 – Sun 14 June 2027"><label class="f">Venue</label><input type="text" name="venue" value="'+h(I.venue)+'"><label class="f">Welcome message</label><textarea name="blurb" rows="3">'+h(I.blurb)+'</textarea><div class="actions"><button type="button" class="btn ghost" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>';
+  } else if(M.type==='event'){
+    var e=M.id?state.events.find(function(x){return x.id===M.id;}):{name:'',kind:'singles'};
+    inner='<h3>'+(M.id?'Edit event':'New event')+'</h3><form data-form="saveEvent"><label class="f">Name</label><input type="text" name="name" value="'+h(e.name)+'" placeholder="e.g. Junior Singles (U14)" required><label class="f">Format</label><select name="kind" '+(e.draw?'disabled':'')+'><option value="singles" '+(e.kind==='singles'?'selected':'')+'>Singles</option><option value="doubles" '+(e.kind==='doubles'?'selected':'')+'>Doubles</option></select>'+
+      '<div class="actions">'+(M.id?'<button type="button" class="btn danger" data-act="delEvent">Delete event</button>':'')+'<span class="spacer"></span><button type="button" class="btn ghost" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>';
+  }
+  return '<div class="modal-bg" data-act="bg"><div class="modal" role="dialog">'+inner+'</div></div>';
+}
+function confirmBox(title,text,yes,fn){ ui.modal={type:'confirm',title:title,text:text,yes:yes,fn:fn}; render(); }
+
+/* ---------- render ---------- */
+var ROUTES=['home','players','draws','matches','honours'];
+function route(){ var r=location.hash.slice(1); return ROUTES.indexOf(r)>=0?r:'home'; }
+function headerHTML(rt){
+  var labels={home:'Home',players:'Players',draws:'Draws',matches:'Matches',honours:'Honours'};
+  var tools='';
+  if(!isStandalone) tools+='<button class="hbtn ball" data-act="install">⬇ Install app</button>';
+  if(REMOTE) tools+= readOnly ? '<button class="hbtn" data-act="login">🔒 Organiser</button>' : '<button class="hbtn on" data-act="logout" title="Log out of organiser mode">✓ Organiser · Log out</button>';
+  return '<header class="top"><div class="wrap"><a class="brand" href="#home">'+BALL+'<b>Moseley Open</b></a><div class="htools">'+tools+'</div><nav class="tabs">'+
+    ROUTES.map(function(r){return '<a href="#'+r+'" class="'+(r===rt?'on':'')+'">'+labels[r]+'</a>';}).join('')+'</nav></div></header>';
+}
+function render(){
+  var rt=route();
+  var focusName = document.activeElement && document.activeElement.name;
+  var body, banner='';
+  if(!state){
+    body = loadErr ? '<div class="empty" style="margin-top:30px"><b>Couldn’t load the tournament.</b><br>'+h(loadErr)+'<br><br><button class="btn" data-act="retry">Try again</button></div>'
+                   : '<div class="empty" style="margin-top:30px">Loading the Moseley Open…</div>';
+  } else {
+    body = rt==='players'?viewPlayers():rt==='draws'?viewDraws():rt==='matches'?viewMatches():rt==='honours'?viewHonours():viewHome();
+    if(!REMOTE) banner='<div class="banner">Preview mode: changes are only saved on this device until the shared database is connected.</div>';
+    else if(offline) banner='<div class="banner">You’re offline. Showing the last scores this device saw.</div>';
+  }
+  document.getElementById('root').innerHTML = headerHTML(rt)+
+    '<main><div class="wrap">'+banner+body+'</div></main>'+
+    '<footer>Moseley Open · tournament hub</footer>'+modalHTML()+(ui.toast?'<div class="toast">'+h(ui.toast)+'</div>':'');
+  if(ui.modal && focusName){ var el=document.querySelector('.modal [name="'+focusName+'"]'); if(el) el.focus(); }
+  else if(ui.modal && ui.modal.type==='pin'){ var pi=document.querySelector('.modal input[name=pin]'); if(pi) pi.focus(); }
+}
+
+/* ---------- actions ---------- */
+function evById(id){ return state.events.find(function(e){return e.id===id;}); }
+var acts={
+  login:function(){ ui.modal={type:'pin',err:''}; render(); },
+  logout:function(){ confirmBox('Log out of organiser mode?','You can log back in any time with the PIN.','Log out',function(){ logout(); toast('Logged out'); }); },
+  retry:function(){ loadErr=''; render(); loadRemote(true); },
+  install:function(){
+    if(deferredPrompt){ var p=deferredPrompt; deferredPrompt=null; p.prompt(); p.userChoice.then(function(){ render(); }).catch(function(){}); return; }
+    ui.modal={type:'install'}; render();
+  },
+  selEv:function(d){ ui.evSel=d.ev; try{sessionStorage.setItem('mo-ev',d.ev);}catch(e){} render(); },
+  newEvent:function(){ ui.modal={type:'event'}; render(); },
+  editEvent:function(d){ ui.modal={type:'event',id:d.ev}; render(); },
+  delEvent:function(){ var id=ui.modal.id, ev=evById(id); confirmBox('Delete '+ev.name+'?','This removes its entries, draw and results.','Delete',function(){ state.events=state.events.filter(function(e){return e.id!==id;}); ui.evSel=null; commit('Event deleted'); }); },
+  delEntry:function(d){ var ev=currentEvent(); ev.entries=ev.entries.filter(function(e){return e.id!==d.id;}); commit(); },
+  genDraw:function(){ var ev=currentEvent(); if(ev.entries.length<2) return; makeDraw(ev); location.hash='#draws'; commit('Draw made'); },
+  resetDraw:function(){ var ev=currentEvent(); confirmBox('Reset the '+ev.name+' draw?','All results in this event will be cleared. Entries are kept.','Reset draw',function(){ ev.draw=null; location.hash='#players'; commit('Draw reset'); }); },
+  openResult:function(d){ var ev=evById(d.ev), m=ev.draw.rounds[+d.r][+d.i]; ui.modal={type:'result',ev:d.ev,r:+d.r,i:+d.i,w:m.w,score:m.score}; render(); },
+  pickW:function(d){ var f=document.querySelector('.modal form'); if(f) ui.modal.score=f.score.value; ui.modal.w=d.k; render(); },
+  clearResult:function(){ var M=ui.modal, ev=evById(M.ev), m=ev.draw.rounds[M.r][M.i]; m.w=null; m.score=''; derive(ev); ui.modal=null; commit('Result cleared'); },
+  editInfo:function(){ ui.modal={type:'info'}; render(); },
+  close:function(){ ui.modal=null; render(); },
+  bg:function(d,el,e){ if(e.target===el){ ui.modal=null; render(); } },
+  confirmYes:function(){ var fn=ui.modal.fn; ui.modal=null; fn(); },
+  delHon:function(d){ state.honours=state.honours.filter(function(x){return x.id!==d.id;}); commit(); },
+  archive:function(){
+    var yr=String(new Date().getFullYear()), added=0;
+    state.events.forEach(function(ev){ var c=champion(ev); if(!c) return;
+      if(state.honours.some(function(x){return x.year===yr&&x.event===ev.name;})) return;
+      state.honours.push({id:uid(),year:yr,event:ev.name,winner:c.winner,runnerUp:c.runnerUp}); added++; });
+    commit(added?'Added to honours board':'Already on the honours board');
+  }
+};
+var forms={
+  pinLogin:function(f){
+    var v=f.pin.value.trim(); if(!v) return;
+    ui.modal.err=''; ui.modal.busy=true; render();
+    rest('/rest/v1/rpc/check_pin',{p_pin:v}).then(function(ok){
+      if(ok===true){ pin=v; readOnly=false; try{ localStorage.setItem('mo-pin',v); }catch(e){} ui.modal=null; toast('Organiser mode on'); }
+      else { ui.modal.busy=false; ui.modal.err='That PIN isn\u2019t right.'; render(); }
+    }).catch(function(){ ui.modal.busy=false; ui.modal.err='Couldn\u2019t check the PIN. Are you online?'; render(); });
+  },
+  addEntries:function(f){
+    var ev=currentEvent();
+    f.names.value.split(/\n/).map(function(s){return s.trim();}).filter(Boolean).forEach(function(n){ ev.entries.push({id:uid(),name:n,seed:null}); });
+    commit('Entries added');
+  },
+  saveResult:function(f){
+    var M=ui.modal; if(!M.w){ toast('Pick the winner first'); return; }
+    var ev=evById(M.ev), m=ev.draw.rounds[M.r][M.i];
+    m.w=M.w; m.score=f.score.value.trim(); m.court=f.court.value.trim(); m.time=f.time.value.trim();
+    derive(ev); ui.modal=null;
+    var c=champion(ev);
+    commit(c&&M.r===ev.draw.rounds.length-1 ? '🏆 '+c.winner+' wins the '+ev.name+'!' : 'Result saved');
+  },
+  saveInfo:function(f){ state.info={dates:f.dates.value.trim(),venue:f.venue.value.trim(),blurb:f.blurb.value.trim()}; ui.modal=null; commit('Details saved'); },
+  saveEvent:function(f){
+    var M=ui.modal, name=f.name.value.trim(); if(!name) return;
+    if(M.id){ var ev=evById(M.id); ev.name=name; if(!ev.draw) ev.kind=f.kind.value; }
+    else { var ne={id:uid(),name:name,kind:f.kind.value,entries:[],draw:null}; state.events.push(ne); ui.evSel=ne.id; }
+    ui.modal=null; commit('Event saved');
+  },
+  addHon:function(f){
+    if(!f.winner.value.trim()) return;
+    state.honours.push({id:uid(),year:f.year.value.trim(),event:f.event.value.trim(),winner:f.winner.value.trim(),runnerUp:f.runnerUp.value.trim()});
+    commit('Added');
+  }
+};
+var root=document.getElementById('root');
+root.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]'); if(!el) return;
+  var fn=acts[el.dataset.act]; if(!fn) return;
+  if(el.dataset.act!=='bg') e.preventDefault();
+  fn(el.dataset,el,e);
+});
+root.addEventListener('submit',function(e){ e.preventDefault(); var fn=forms[e.target.dataset.form]; if(fn) fn(e.target); });
+root.addEventListener('change',function(e){
+  if(e.target.hasAttribute && e.target.hasAttribute('data-evsel')){
+    var v=e.target.value;
+    if(v==='__new'){ e.target.value=ui.evSel; acts.newEvent(); }
+    else acts.selEv({ev:v});
+    return;
+  }
+  var id=e.target.dataset && e.target.dataset.seed; if(!id) return;
+  var ev=currentEvent(), en=ev.entries.find(function(x){return x.id===id;});
+  var v=parseInt(e.target.value,10); en.seed = v>0 ? v : null; commit();
+});
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&ui.modal){ ui.modal=null; render(); } });
+window.addEventListener('hashchange',render);
+
+/* ---------- install as an app ---------- */
+var deferredPrompt = null;
+var isStandalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt = e; render(); });
+window.addEventListener('appinstalled', function(){ deferredPrompt=null; isStandalone=true; toast('Installed! Look for the Moseley Open icon.'); });
+if('serviceWorker' in navigator && /^https:|^http:\/\/localhost/.test(location.href)){
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
+
+/* ---------- start ---------- */
+if(REMOTE){
+  render();
+  loadRemote(true);
+  setInterval(function(){ if(document.visibilityState==='visible') loadRemote(false); }, 15000);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') loadRemote(false); });
+  window.addEventListener('online', function(){ loadRemote(false); if(dirty) scheduleSave(); });
+} else {
+  try{ var ls=localStorage.getItem(LS_KEY); if(ls) state=JSON.parse(ls); }catch(e){}
+  if(!state) state = defaultState();
+  render();
+}
+})();
+</script></body></html>
